@@ -89,3 +89,66 @@ func TestMapGetDeepFlattened(t *testing.T) {
 		})
 	}
 }
+
+type ToFloat64TestCase struct {
+	value                any
+	expectedResult       float64
+	expectedErrorMessage string
+}
+
+func TestTofloat64(t *testing.T) {
+	cases := []ToFloat64TestCase{
+		{
+			value:                1,
+			expectedResult:       1.0,
+			expectedErrorMessage: "",
+		},
+		{
+			value:                1000000000000000000,
+			expectedResult:       1000000000000000000.0,
+			expectedErrorMessage: "",
+		},
+		{
+			value:                -1000000000000000000,
+			expectedResult:       -1000000000000000000.0,
+			expectedErrorMessage: "",
+		},
+		{
+			value:                1.234,
+			expectedResult:       1.234,
+			expectedErrorMessage: "",
+		},
+		{
+			value:                "1",
+			expectedResult:       1.0,
+			expectedErrorMessage: "",
+		},
+		{
+			value:                true,
+			expectedResult:       0,
+			expectedErrorMessage: "Can't convert to float64.",
+		},
+		{
+			value:                make(map[string]any),
+			expectedResult:       0,
+			expectedErrorMessage: "Can't convert to float64.",
+		},
+		{
+			value:                []int{1, 2, 3},
+			expectedResult:       0,
+			expectedErrorMessage: "Can't convert to float64.",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(fmt.Sprintf("toFloat(%v)=%v, %v", tc.value, tc.expectedResult, tc.expectedErrorMessage), func(t *testing.T) {
+			result, err := toFloat64(tc.value)
+			if (err == nil && len(tc.expectedErrorMessage) > 0) || (err != nil && err.Error() != tc.expectedErrorMessage) {
+				t.Errorf("Expected error '%#v', but got '%#v'", tc.expectedErrorMessage, err.Error())
+			}
+			if !cmp.Equal(tc.expectedResult, result) {
+				t.Errorf("Expected '%#v', but got '%#v'", tc.expectedResult, result)
+			}
+		})
+	}
+}

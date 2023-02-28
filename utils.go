@@ -223,7 +223,7 @@ func toFloat64(value any) (float64, error) {
 			return fv, nil
 		}
 	}
-	return 0, errors.New("Can't convert to float64")
+	return 0, errors.New("Can't convert to float64.")
 }
 
 func prettify(x any) any {
