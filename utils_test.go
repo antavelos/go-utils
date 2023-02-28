@@ -25,7 +25,7 @@ func TestFlattenArray(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("flattenArray(%v)=%v", tc.array, tc.expectedFlattened), func(t *testing.T) {
-			flattened := flattenArray(tc.array)
+			flattened := FlattenArray(tc.array)
 			if !cmp.Equal(tc.expectedFlattened, flattened) {
 				t.Errorf("Expected '%#v', but got '%#v'", tc.expectedFlattened, flattened)
 			}
@@ -82,7 +82,7 @@ func TestMapGetDeepFlattened(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("mapGetDeep(%v, %v)=%v", tc.m, tc.key, tc.expectedValues), func(t *testing.T) {
-			values := mapGetDeepFlattened(tc.m, tc.key)
+			values := MapGetDeepFlattened(tc.m, tc.key)
 			if !compareCounters(counterFromArray(tc.expectedValues), counterFromArray(values)) {
 				t.Errorf("Expected '%#v', but got '%#v'", tc.expectedValues, values)
 			}
@@ -142,7 +142,7 @@ func TestTofloat64(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("toFloat(%v)=%v, %v", tc.value, tc.expectedResult, tc.expectedErrorMessage), func(t *testing.T) {
-			result, err := toFloat64(tc.value)
+			result, err := ToFloat64(tc.value)
 			if (err == nil && len(tc.expectedErrorMessage) > 0) || (err != nil && err.Error() != tc.expectedErrorMessage) {
 				t.Errorf("Expected error '%#v', but got '%#v'", tc.expectedErrorMessage, err.Error())
 			}

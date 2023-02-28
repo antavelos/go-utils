@@ -8,32 +8,32 @@ import (
 	"strconv"
 )
 
-func isMap(t any) bool {
+func IsMap(t any) bool {
 	return reflect.ValueOf(t).Kind() == reflect.Map
 }
 
-func isSlice(t any) bool {
+func IsSlice(t any) bool {
 	return reflect.ValueOf(t).Kind() == reflect.Slice
 }
 
-func isMapOrSlice(t any) bool {
-	return isMap(t) || isSlice(t)
+func IsMapOrSlice(t any) bool {
+	return IsMap(t) || IsSlice(t)
 }
 
-func isString(t any) bool {
+func IsString(t any) bool {
 	return reflect.ValueOf(t).Kind() == reflect.String
 }
 
 // flattenArray flattens any array of arrays.
 // Example: flattenArray([1, 2, 3, [4, 5, [6, 7, [8, 9]]]]) = [1, 2, 3, 4, 5, 6, 7, 8, 9].
-func flattenArray(arr []any) (result []any) {
+func FlattenArray(arr []any) (result []any) {
 	for _, item := range arr {
-		if !isSlice(item) {
+		if !IsSlice(item) {
 			result = append(result, item)
 			continue
 		}
 
-		flattenedItem := flattenArray(item.([]any))
+		flattenedItem := FlattenArray(item.([]any))
 
 		for _, fitem := range flattenedItem {
 			result = append(result, fitem)
@@ -45,27 +45,27 @@ func flattenArray(arr []any) (result []any) {
 
 // mapGetDeep returns an array of the values of all the nodes withkey `key`.
 // m can be either a map of a slice.
-func mapGetDeep(m any, key string) (result []any) {
-	if isMap(m) {
+func MapGetDeep(m any, key string) (result []any) {
+	if IsMap(m) {
 		v, ok := m.(map[string]any)[key]
 		if ok {
 			result = append(result, v)
 			return
 		}
 
-		for mkey := range iterMapKeys(m, nil) {
+		for mkey := range IterMapKeys(m, nil) {
 			v, _ := m.(map[string]any)[mkey]
-			if isMapOrSlice(v) {
-				if dv := mapGetDeep(v, key); dv != nil {
+			if IsMapOrSlice(v) {
+				if dv := MapGetDeep(v, key); dv != nil {
 					result = append(result, dv)
 				}
 			}
 		}
 	}
 
-	if isSlice(m) {
+	if IsSlice(m) {
 		for _, item := range m.([]any) {
-			if v := mapGetDeep(item, key); v != nil {
+			if v := MapGetDeep(item, key); v != nil {
 				result = append(result, v)
 			}
 		}
@@ -76,32 +76,32 @@ func mapGetDeep(m any, key string) (result []any) {
 
 // mapPutDeep updates the values of all the nodes withey `key`.
 // m can be either a map of a slice.
-func mapPutDeep(m any, key string, value any) error {
-	if isMap(m) {
+func MapPutDeep(m any, key string, value any) error {
+	if IsMap(m) {
 		if _, ok := m.(map[string]any)[key]; ok {
 			m.(map[string]any)[key] = value
 			return nil
 		}
 
-		for mkey := range iterMapKeys(m, nil) {
+		for mkey := range IterMapKeys(m, nil) {
 			mvalue, _ := m.(map[string]any)[mkey]
-			if isMapOrSlice(mvalue) {
-				mapPutDeep(mvalue, key, value)
+			if IsMapOrSlice(mvalue) {
+				MapPutDeep(mvalue, key, value)
 			}
 		}
 	}
 
-	if isSlice(m) {
+	if IsSlice(m) {
 		for _, item := range m.([]any) {
-			mapPutDeep(item, key, value)
+			MapPutDeep(item, key, value)
 		}
 	}
 	return nil
 }
 
 // mapGetDeepFlattened returns the same as `getDeepFlattened` but the result will be a flattened array.
-func mapGetDeepFlattened(m any, key string) []any {
-	return flattenArray(mapGetDeep(m, key))
+func MapGetDeepFlattened(m any, key string) []any {
+	return FlattenArray(MapGetDeep(m, key))
 }
 
 // Holds the numbder of occurences of a item in an array.
@@ -147,7 +147,7 @@ func sendOrQuit[T any](t T, out chan<- T, quit <-chan struct{}) bool {
 }
 
 // iterMapKeys generates the keys of a given map
-func iterMapKeys(m any, quit <-chan struct{}) <-chan string {
+func IterMapKeys(m any, quit <-chan struct{}) <-chan string {
 	out := make(chan string)
 
 	go func() {
@@ -165,7 +165,7 @@ func iterMapKeys(m any, quit <-chan struct{}) <-chan string {
 	return out
 }
 
-func iterAny(t any, quit <-chan struct{}) <-chan any {
+func IterAny(t any, quit <-chan struct{}) <-chan any {
 	out := make(chan any)
 
 	go func() {
@@ -183,8 +183,8 @@ func iterAny(t any, quit <-chan struct{}) <-chan any {
 }
 
 // mapHasKey determines whether a given key exists in a given map
-func mapHasKey(m any, key string) bool {
-	for mkey := range iterMapKeys(m, nil) {
+func MapHasKey(m any, key string) bool {
+	for mkey := range IterMapKeys(m, nil) {
 		if mkey == key {
 			return true
 		}
@@ -193,7 +193,7 @@ func mapHasKey(m any, key string) bool {
 }
 
 // toFloat converts any number like value or any string number to float64.
-func toFloat64(value any) (float64, error) {
+func ToFloat64(value any) (float64, error) {
 	switch v := value.(type) {
 	case int:
 		return float64(v), nil
@@ -226,7 +226,7 @@ func toFloat64(value any) (float64, error) {
 	return 0, errors.New("Can't convert to float64.")
 }
 
-func prettify(x any) any {
+func Prettify(x any) any {
 	b, err := json.MarshalIndent(x, "", "  ")
 	if err != nil {
 		return x
